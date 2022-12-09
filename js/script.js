@@ -4,6 +4,8 @@ const username = "Tyler-Zorb";       //this adds my GitHub username.
 const repoList = document.querySelector(".repo-list");      //This variable will select the unordered list to display the repos list.
 const allReposContainer = document.querySelector(".repos");   //This variable selects the section with a class of "repos" where all my repo info appears.
 const repoData = document.querySelector(".repo-data");    //This variable selects the section with a calss of "repo-data" where the individual repo data will appear.
+const viewReposButton = document.querySelector(".view-repos");    //This selects the Back to Repo Gallery button (look at the class for it on html)
+const filterInput = document.querySelector(".filter-repos");    //This selects the input with the Search by name placeholder.
 
 const gitUserInfo = async function () {         //this is an async function to fetch info from my GitHub profile using the GitHub API address. I had to target the "users" endpoint and use a template literal to add the global username variable to the endpoint.
     const userInfo = await fetch(`https://api.github.com/users/${username}`);
@@ -15,7 +17,7 @@ gitUserInfo();  //calling the function to see results.
 
 const displayUserInfo = function (data) {           //creating a function to display the fetched user information on the page. This accepts the JSON data as a parameter.
     const div = document.createElement("div");      //inside this function this is a new div created and it'll have the class of "user-info"
-    div.classList.add("user.info");
+    div.classList.add("user-info");
 
     //This innerHTML populates the div with the elements for figure, image, paragraphs
     //I have to use the JSON data in the 5 placeholders to grab the relevant properties to display on the page.
@@ -39,7 +41,8 @@ const gitRepos = async function () {        //This async function will fetch my 
 };
 
 const displayRepos = function (repos) {     //This function displays info about each repo. Repos is the parameter so that the function accepts the data returned from my last API call.
-    for (const repo of repos) {
+  filterInput.classList.remove("hide");   //showing the filerInput element. So that the search box now displays.
+  for (const repo of repos) {
        const repoItem = document.createElement("li");   //This I need because I need to list out the repos.
        repoItem.classList.add("repo");          //This add the class of repo.
        repoItem.innerHTML = `<h3>${repo.name}</h3> `;       //This gives each item an <h3> element with the repo name
@@ -72,6 +75,7 @@ const getRepoInfo = async function (repoName) {     //async function that accept
 };
 
 const displayRepoInfo = function (repoInfo, languages) {
+  viewReposButton.classList.remove("hide");   //This I added in after creating the viewReposButton function below this. It's so the button will appear to go back after clicking a repo.
   repoData.innerHTML = "";    //This will empty the HTML of the section with a class of "repo-data" where the individual repo data will appear.
   repoData.classList.remove("hide");  //Here I'm unhiding or show the repo-data element.
   allReposContainer.classList.add("hide");  //Here I'm hiding the element with the class of "repos"
@@ -86,3 +90,23 @@ const displayRepoInfo = function (repoInfo, languages) {
   `;
   repoData.append(div);     //appending the new div element to the section with a class of "repo-data"
 };
+
+viewReposButton.addEventListener("click", function () {     //This function is configuring the button to go back to the repo list. It will hide and show certain things for it to work.
+  allReposContainer.classList.remove("hide"); //This told me to show the section with the class of "repos",  the location where all the repo info appears (can check the global variables at the top for "repos")
+  repoData.classList.add("hide");     //This told me to hide the class to the section where the individual repo data will appear.
+  viewReposButton.classList.add("hide");  //This is hiding this button 
+});
+
+filterInput.addEventListener("input", function (e) {      //This is an input event listener to the filterInput var. Also passing the event e in the call back function.
+  const searchText = e.target.value;    //variable that captures the value of the search text.
+  const repos = document.querySelectorAll(".repo"); //var that selects all elements on the page with a class of ".repo" 
+  const searchLowerText = searchText.toLowerCase();   //This var is assigned to the lowercase value of the search text.
+  for(const repo of repos) {      //This for of loop will loop through each repo inside my repos element.
+    const repoLowerText = repo.innerText.toLowerCase();     //This var is assigned to the lowercase value of the innerText. of each repo.
+    if (repoLowerText.includes(searchLowerText)) {    //This if statement - I'm checking to see if the lowercase repo text includes the lowercase search text.
+        repo.classList.remove("hide");    //Here if it contains the text I'm showing it.
+    } else {    //Here if it doesn't contain the text I'm hiding the repo.
+      repo.classList.add("hide");
+    }
+  }     
+});
